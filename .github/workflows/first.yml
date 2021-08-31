@@ -1,6 +1,8 @@
 name: Android CI
 
 on:
+    schedule:
+    - cron:  '0 8 * * 1-5'
     #schedule:
           #     Run every 5 mins
           #- cron:  '*/5 * * * *'
@@ -9,12 +11,13 @@ on:
            #    * is a special character in YAML so you have to quote this string
            #    - cron:  '30 5,17 * * *'
            
-    push:
-        branches: [ master ]
-    pull_request:
-        branches: [ master ]
+    #push:
+    #    branches: [ master ]
+    #pull_request:
+    #    branches: [ master ]
            
-    workflow_dispatch:
+#    workflow_dispatch: 
+    workflow_dispatch: # to be able to run action manually 
 
 jobs:
   build:
@@ -62,3 +65,4 @@ jobs:
         with:
           name: app
           path: app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 1
