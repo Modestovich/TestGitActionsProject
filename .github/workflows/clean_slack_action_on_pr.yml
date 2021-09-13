@@ -1,0 +1,19 @@
+name: PR status
+
+on:
+  pull_request:
+    branches: [ master ]
+
+  workflow_dispatch:
+
+jobs:
+  slack:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Notify PR status in Slack
+      env:
+        SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      uses: pullreminders/slack-action@master
+      with:
+          args: '{\"channel\":\"C02E6Q6HAKV\",\"attachments\":[{\"pretext\":\"Creator: ${{github.event.pull_request.head.user.login}}\",\"text\": \"PR title: ${{github.event.pull_request.title}}\nReviewers: ${{github.event.pull_request.head.repo.url}}\n PR link: ${{github.event.pull_request.head.repo.url}} \" }]}'
