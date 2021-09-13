@@ -1,6 +1,7 @@
 name: Slack API testing
 
 on:
+
   workflow_dispatch:
 
 jobs:

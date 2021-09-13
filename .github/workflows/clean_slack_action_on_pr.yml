@@ -1,0 +1,26 @@
+name: PR status
+
+on:
+  pull_request:
+    branches: [ master ]
+
+  workflow_dispatch:
+
+jobs:
+  slack:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Notify PR status in Slack
+      env:
+        SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      uses: pullreminders/slack-action@master
+      with:
+          args: '{\"channel\":\"C02E6Q6HAKV\",\"attachments\":[{\"pretext\":\"SIMPLE Creator: ${{github.event.pull_request.head.user.login}}\",\"text\": \"PR title: ${{github.event.pull_request.title}}\nReviewers: ${{github.event.pull_request.head.repo.requested_reviewers}}\n PR link: ${{github.event.pull_request.head.repo.url}} \" }]}'
+          
+    - name: Send pretty PR info
+      env:
+        SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      uses: pullreminders/slack-action@master
+      with:
+          args: '{\n\t\"blocks\": [\n\t\t{\n\t\t\t\"type\": \"section\",\n\t\t\t\"text\": {\n\t\t\t\t\"type\": \"mrkdwn\",\n\t\t\t\t\"text\": \"Hey guys :aw_yeah:\\n Please review my PR. *If you do this fast, I will give you the huge Kudos :heart:*\"\n\t\t\t}\n\t\t},\n\t\t{\n\t\t\t\"type\": \"divider\"\n\t\t},\n\t\t{\n\t\t\t\"type\": \"section\",\n\t\t\t\"text\": {\n\t\t\t\t\"type\": \"mrkdwn\",\n\t\t\t\t\"text\": \"*<{{github.event.pull_request.head.repo.url}}|{{github.event.pull_request.title}}>*\\nList of reviewers: {{github.event.pull_request.head.repo.requested_reviewers}}\\nJira ticket: {{Jira ticket}}\\nCommits: {{Commits}}\"\n\t\t\t},\n\t\t\t\"accessory\": {\n\t\t\t\t\"type\": \"image\",\n\t\t\t\t\"image_url\": \"{{github.event.pull_request.head.user.avatar_url}}\",\n\t\t\t\t\"alt_text\": \"Creator Image\"\n\t\t\t}\n\t\t},\n\t\t{\n\t\t\t\"type\": \"divider\"\n\t\t},\n\t\t{\n\t\t\t\"type\": \"section\",\n\t\t\t\"text\": {\n\t\t\t\t\"type\": \"mrkdwn\",\n\t\t\t\t\"text\": \"*Tests execution results*\"\n\t\t\t}\n\t\t},\n\t\t{\n\t\t\t\"type\": \"section\",\n\t\t\t\"text\": {\n\t\t\t\t\"type\": \"mrkdwn\",\n\t\t\t\t\"text\": \"*T-Mobile* | :white_check_mark: \"\n\t\t\t}\n\t\t}\n\t]\n}'
