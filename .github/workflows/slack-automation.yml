@@ -39,6 +39,11 @@ jobs:
       with:
           args: '{\"channel\":\"C02E6Q6HAKV\",\"attachments\":[{\"pretext\":\"Steps\",\"text\": \"steps: ${{ toJson(steps) }} \" }]}'
           
-          
+    - name: Notify slack commits
+      env:
+        SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      uses: pullreminders/slack-action@master
+      with:
+          args: '{\"channel\":\"C02E6Q6HAKV\",\"attachments\":[{\"pretext\":\"Steps\",\"text\": \"steps: ${{ toJson(github.event.head_commit) }} \" }]}'
           
 #        args: '{\"channel\":\"C02E6Q6HAKV\",\"attachments\":[{\"text\":\"My text\",\"pretext\": \"github event: ${{ toJson(github.event) }} \n github itself: ${{ toJson(github) }} \n\" }]}'
