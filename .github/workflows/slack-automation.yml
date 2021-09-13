@@ -11,10 +11,34 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Notify slack
+    - name: Notify slack github full
       env:
         SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
       uses: pullreminders/slack-action@master
       with:
-          args: '{\"channel\":\"C02E6Q6HAKV\",\"attachments\":[{\"pretext\":\"My text\",\"text\": \"github itself: ${{ toJson(github) }} \n env: ${{ env }} \n job: ${{ job }} \n steps: ${{ steps }} \" }]}'
+          args: '{\"channel\":\"C02E6Q6HAKV\",\"attachments\":[{\"pretext\":\"Github info\",\"text\": \"github itself: ${{ toJson(github) }} \" }]}'
+
+    - name: Notify slack env full
+      env:
+        SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      uses: pullreminders/slack-action@master
+      with:
+          args: '{\"channel\":\"C02E6Q6HAKV\",\"attachments\":[{\"pretext\":\"Env info\",\"text\": \"env: ${{ env }} \" }]}'
+          
+    - name: Notify slack job full
+      env:
+        SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      uses: pullreminders/slack-action@master
+      with:
+          args: '{\"channel\":\"C02E6Q6HAKV\",\"attachments\":[{\"pretext\":\"Env info\",\"text\": \"job: ${{ job }} \n steps: ${{ steps }} \" }]}'
+          
+    - name: Notify slack steps full
+      env:
+        SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      uses: pullreminders/slack-action@master
+      with:
+          args: '{\"channel\":\"C02E6Q6HAKV\",\"attachments\":[{\"pretext\":\"Env info\",\"text\": \"steps: ${{ steps }} \" }]}'
+          
+          
+          
 #        args: '{\"channel\":\"C02E6Q6HAKV\",\"attachments\":[{\"text\":\"My text\",\"pretext\": \"github event: ${{ toJson(github.event) }} \n github itself: ${{ toJson(github) }} \n\" }]}'
