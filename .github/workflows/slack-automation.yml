@@ -23,21 +23,21 @@ jobs:
         SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
       uses: pullreminders/slack-action@master
       with:
-          args: '{\"channel\":\"C02E6Q6HAKV\",\"attachments\":[{\"pretext\":\"Env info\",\"text\": \"env: ${{ env }} \" }]}'
+          args: '{\"channel\":\"C02E6Q6HAKV\",\"attachments\":[{\"pretext\":\"Env info\",\"text\": \"env: ${{ toJson(env) }} \" }]}'
           
     - name: Notify slack job full
       env:
         SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
       uses: pullreminders/slack-action@master
       with:
-          args: '{\"channel\":\"C02E6Q6HAKV\",\"attachments\":[{\"pretext\":\"Env info\",\"text\": \"job: ${{ job }} \n steps: ${{ steps }} \" }]}'
+          args: '{\"channel\":\"C02E6Q6HAKV\",\"attachments\":[{\"pretext\":\"Job\",\"text\": \"job: ${{ toJson(job) }} \" }]}'
           
     - name: Notify slack steps full
       env:
         SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
       uses: pullreminders/slack-action@master
       with:
-          args: '{\"channel\":\"C02E6Q6HAKV\",\"attachments\":[{\"pretext\":\"Env info\",\"text\": \"steps: ${{ steps }} \" }]}'
+          args: '{\"channel\":\"C02E6Q6HAKV\",\"attachments\":[{\"pretext\":\"Steps\",\"text\": \"steps: ${{ toJson(steps) }} \" }]}'
           
           
           
