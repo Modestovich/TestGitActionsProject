@@ -46,8 +46,12 @@ jobs:
       with:
           args: '{\"channel\":\"C02E6Q6HAKV\",\"attachments\":[{\"pretext\":\"Steps\",\"text\": \"steps: ${{ toJson(github.event.head_commit) }} \" }]}'
           
+    #- name: Print in logs
+    #  run: |
+    #      echo "${{toJSON(github.event)}}"
+          
     - name: Print in logs
       run: |
-          echo "${{toJSON(github.event)}}"
+          echo "${{toJSON(github.event.pull_request)}}"
           
 #        args: '{\"channel\":\"C02E6Q6HAKV\",\"attachments\":[{\"text\":\"My text\",\"pretext\": \"github event: ${{ toJson(github.event) }} \n github itself: ${{ toJson(github) }} \n\" }]}'
