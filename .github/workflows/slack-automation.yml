@@ -1,0 +1,20 @@
+name: Slack API testing
+
+on:
+  pull_request:
+    branches: [ master ]
+
+  workflow_dispatch:
+
+jobs:
+  slack:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Notify slack
+      env:
+        SLACK_BOT_TOKEN: ${{ secrets.SLACK_API_TEST_TOKEN }}
+      uses: pullreminders/slack-action@master
+      with:
+        args: '{\"channel\":\"C02E6QA2SG3\",\"text\":\"Hello world\"}'
