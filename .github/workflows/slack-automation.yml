@@ -49,7 +49,22 @@ jobs:
     #- name: Print in logs
     #  run: |
     #      echo "${{toJSON(github.event)}}"
+    - name: Print PR title
+      run: |
+          echo "${{github.event.pull_request.base.repo.title}}"
           
+    - name: Print PR creator
+      run: |
+          echo "${{github.event.pull_request.base.repo.user.login}}, avatar link ${{github.event.pull_request.base.repo.user.avatar_url}}"
+          
+    - name: Print PR link
+      run: |
+          echo "${{github.event.pull_request.base.repo.user.login}}, avatar link ${{github.event.pull_request.base.repo.url}}"
+          
+    - name: Print PR reviewers
+      run: |
+          echo "${{github.event.pull_request.base.repo.user.login}}, avatar link ${{toJSON(github.event.pull_request.base.repo.requested_reviewers)}}"
+
     - name: Print in logs
       run: |
           echo "${{toJSON(github.event.pull_request)}}"
