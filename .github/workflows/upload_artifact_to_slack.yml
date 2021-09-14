@@ -1,0 +1,38 @@
+name: Upload artifact to slack
+
+on:
+  pull_request:
+    branches: [ master ]
+
+  workflow_dispatch:
+
+jobs:
+
+  build-the-artifact:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Setup JDK
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: Build debug apk
+        run: bash ./gradlew assembleDebug --stacktrace
+        
+      - name: Upload debug apk
+        uses: actions/upload-artifact@v2
+        with:
+            name: best-app-ever
+            path: app/build/outputs/apk/debug/app-debug.apk
+            retention-days: 1
+            
+      - name: Send report to slack
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        uses: pullreminders/slack-action@master
+        with:
+          args: '{\"channel\":\"C02E6Q6HAKV\",\"attachments\":[{\"pretext\":\"Apk link: }]}'
