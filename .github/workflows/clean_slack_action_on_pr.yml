@@ -60,6 +60,15 @@ jobs:
             echo "::set-env name=failure_step_result::$failure_step_result"
             echo "flag set to :x:";
           fi
+          
+    - name: Test loops in bash
+      if: always()
+      run: |
+          for step in ${{ steps }}
+          do
+            echo "$step"
+            echo $step
+          done
             
     - name: Print env
       if: always()
