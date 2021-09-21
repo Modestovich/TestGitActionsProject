@@ -67,7 +67,6 @@ jobs:
           for step in ${{ steps }}
           do
             echo "$step"
-            echo $step
           done
             
     - name: Print env
