@@ -65,7 +65,7 @@ jobs:
       if: always()
       run: |
           items=${{ toJSON(steps) }}
-          for i in ${items}; do
+          for i in ${items[@]}; do
             echo "${toJSON($i)}"
           done
             
