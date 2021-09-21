@@ -66,23 +66,18 @@ jobs:
       run: |
         echo '${{toJSON(steps)}}' | jq '."common"."outcome"'
         echo '${{toJSON(steps)}}' | jq -r 'to_entries|map((.key)=(.key|tostring))|.[]'
-        for i in '${{toJSON(steps)}}' | jq -r 'to_entries|map((.key)=(.key|tostring))|.[]'; do
-           echo "$i.key"
-           echo "$i.value"
-           echo "$i"
-        done
-        
-#        for k in $(jq '. | keys | .[]' <<< "${{toJSON(steps)}}"); do
-#          echo $k
+        declare -A myarray
+        while IFS="=" read -r key value
+        do
+           myarray[$key]="$value"
+        done < <('${{toJSON(steps)}}' | jq -r 'to_entries|map((.key)=(.key|tostring))|.[]')
+
+#        for i in '${{toJSON(steps)}}' | jq -r 'to_entries|map((.key)=(.key|tostring))|.[]'; do
+#           echo "$i.key"
+#           echo "$i.value"
+#           echo "$i"
 #        done
-#        s_steps=$(echo $rulebase_list | jq '.total')
-#          items=${echo "${{toJSON(steps)}}" | jq -c -r '.{}'}
-#          for i in ${items}; do
-#            echo "${toJSON($i)}"
-#          done
-#          readarray -t items < <(jq -c '.[]' <<< ${{toJSON(steps)}})
-#          items=${{ toJSON(steps) }}
-            
+                 
     - name: Print env
       if: always()
       run: echo "${{toJSON(env)}}"
