@@ -71,6 +71,11 @@ jobs:
         do
            myarray[$key]="$value"
         done < <('${{toJSON(steps)}}' | jq -r 'to_entries|map((.key)=(.key|tostring))|.[]')
+        
+        for key in "${!myarray[@]}"
+        do
+          echo "$key = ${myarray[$key]}"
+        done
 
 #        for i in '${{toJSON(steps)}}' | jq -r 'to_entries|map((.key)=(.key|tostring))|.[]'; do
 #           echo "$i.key"
