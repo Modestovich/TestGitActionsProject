@@ -1,8 +1,6 @@
 name: Slack API testing
 
 on:
-  pull_request:
-    branches: [ master ]
 
   workflow_dispatch:
 
@@ -11,9 +9,62 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Notify slack
+    - name: Notify slack github full
       env:
         SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
       uses: pullreminders/slack-action@master
       with:
-        args: '{\"channel\":\"C02E6Q6HAKV\",\"attachments\":[{\"text\":\"My text\",\"pretext\": \" ${{ github.event.number }} \" }]}'
+          args: '{\"channel\":\"C02E6Q6HAKV\",\"attachments\":[{\"pretext\":\"Github info\",\"text\": \"github itself: ${{ toJson(github) }} \" }]}'
+
+    - name: Notify slack env full
+      env:
+        SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      uses: pullreminders/slack-action@master
+      with:
+          args: '{\"channel\":\"C02E6Q6HAKV\",\"attachments\":[{\"pretext\":\"Env info\",\"text\": \"env: ${{ toJson(env) }} \" }]}'
+          
+    - name: Notify slack job full
+      env:
+        SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      uses: pullreminders/slack-action@master
+      with:
+          args: '{\"channel\":\"C02E6Q6HAKV\",\"attachments\":[{\"pretext\":\"Job\",\"text\": \"job: ${{ toJson(job) }} \" }]}'
+          
+    - name: Notify slack steps full
+      env:
+        SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      uses: pullreminders/slack-action@master
+      with:
+          args: '{\"channel\":\"C02E6Q6HAKV\",\"attachments\":[{\"pretext\":\"Steps\",\"text\": \"steps: ${{ toJson(steps) }} \" }]}'
+          
+    - name: Notify slack commits
+      env:
+        SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      uses: pullreminders/slack-action@master
+      with:
+          args: '{\"channel\":\"C02E6Q6HAKV\",\"attachments\":[{\"pretext\":\"Steps\",\"text\": \"steps: ${{ toJson(github.event.head_commit) }} \" }]}'
+          
+    #- name: Print in logs
+    #  run: |
+    #      echo "${{toJSON(github.event)}}"
+    - name: Print PR title
+      run: |
+          echo "${{github.event.pull_request.title}}"
+          
+    - name: Print PR creator
+      run: |
+          echo "${{github.event.pull_request.head.user.login}}, avatar link ${{github.event.pull_request.head.user.avatar_url}}"
+          
+    - name: Print PR link
+      run: |
+          echo "${{github.event.pull_request.head.repo.url}}"
+          
+    - name: Print PR reviewers
+      run: |
+          echo "${{toJSON(github.event.pull_request.head.repo.requested_reviewers)}}"
+
+    - name: Print in logs
+      run: |
+          echo "${{toJSON(github.event.pull_request)}}"
+          
+#        args: '{\"channel\":\"C02E6Q6HAKV\",\"attachments\":[{\"text\":\"My text\",\"pretext\": \"github event: ${{ toJson(github.event) }} \n github itself: ${{ toJson(github) }} \n\" }]}'

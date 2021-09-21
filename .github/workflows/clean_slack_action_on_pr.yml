@@ -12,18 +12,44 @@ jobs:
 
     steps:
     - name: Print common data
+      id: common
       run: |
         echo "Reviewers: ${{toJSON(github.event.pull_request.head.repo.requested_reviewers)}},\nRepo url: ${{github.event.pull_request.head.repo.url}},\nTitle: ${{github.event.pull_request.title}},\nAvatar url:${{github.event.pull_request.head.user.avatar_url}}, "
     - name: Notify PR status in Slack
+      id: slack-simple
       env:
         SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
       uses: pullreminders/slack-action@master
       with:
           args: '{\"channel\":\"C02E6Q6HAKV\",\"attachments\":[{\"pretext\":\"SIMPLE Creator: ${{github.event.pull_request.head.user.login}}\",\"text\": \"PR title: ${{github.event.pull_request.title}}\nReviewers: ${{github.event.pull_request.head.repo.requested_reviewers}}\n PR link: ${{github.event.pull_request.head.repo.url}} \" }]}'
           
+    - name: Failure step
+      id: failure-step
+      run: ./gradle some
+      
+    - name: Collect statuses
+      if: always()
+      id: collect-statuses
+      run: |
+          if (steps.common.outputs.status == 'success')
+            echo "::set-env name=common_result:::white_check_mark:"
+            echo "flag set to :white_check_mark:"
+          if (steps.slack-simple.outputs.status == 'success')
+            echo "::set-env name=slack_simple_result:::white_check_mark:"
+            echo "flag set to :white_check_mark:"
+          if (steps.failure-step.outputs.status == 'success')
+            echo "::set-env name=failure_step_result:::white_check_mark:"
+            echo "flag set to :white_check_mark:"
+          else 
+            echo "::set-env name=failure_step_result:::x:"
+            echo "flag set to :x:"
+            
+
+          
     - name: Send pretty PR info
+      if: always()
       env:
         SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
       uses: pullreminders/slack-action@master
       with:
-          args: '{\"channel\":\"C02E6Q6HAKV\",\"blocks\":[{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"Hey guys :aw_yeah: \n Please review my PR. *If you do this fast, I will give you the huge Kudos :heart:*\"}},{\"type\":\"divider\"},{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"*<${{github.event.pull_request.head.repo.url}}|${{github.event.pull_request.title}}>*\nList of reviewers: ${{github.event.pull_request.head.repo.requested_reviewers}}\nJira ticket: !!Jira ticket}}\nCommits: !!Commits}}\"},\"accessory\":{\"type\":\"image\",\"image_url\":\"${{github.event.pull_request.head.user.avatar_url}}\",\"alt_text\":\"Creator Image\"}},{\"type\":\"divider\"},{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"*Tests execution results*\"}},{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"*T-Mobile* | :white_check_mark: \"}}]}'
+          args: '{\"channel\":\"C02E6Q6HAKV\",\"blocks\":[{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"Hey guys :aw_yeah: \n Please review my PR. *If you do this fast, I will give you the huge Kudos :heart:*\"}},{\"type\":\"divider\"},{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"*<${{github.event.pull_request.head.repo.url}}|${{github.event.pull_request.title}}>*\nList of reviewers: ${{github.event.pull_request.head.repo.requested_reviewers}}\nJira ticket: !!Jira ticket}}\nCommits: !!Commits}}\"},\"accessory\":{\"type\":\"image\",\"image_url\":\"${{github.event.pull_request.head.user.avatar_url}}\",\"alt_text\":\"Creator Image\"}},{\"type\":\"divider\"},{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"*Tests execution results*\"}},{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"*Common* | ${common_result} \n*Slack simple* | ${slack_simple_result} \n*Failure result* | env.failure_step_result \"}}]}'
