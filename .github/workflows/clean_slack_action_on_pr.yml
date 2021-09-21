@@ -34,19 +34,22 @@ jobs:
         ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
       id: collect-statuses
       run: |
-          if (steps.common.outputs.status == 'success'); then:
+          echo "{{steps.common.outputs.status}}"
+          if (steps.common.outputs.status == 'success'); then
             export common_result=:white_check_mark:
             echo "::set-env name=common_result::$common_result"
             echo "flag set to :white_check_mark:"
           fi
           
-          if (steps.slack-simple.outputs.status == 'success'); then:
+          echo "{{steps.slack-simple.outputs.status}}"
+          if (steps.slack-simple.outputs.status == 'success'); then
             export slack_simple_result=:white_check_mark:
             echo "::set-env name=slack_simple_result::$slack_simple_result"
             echo "flag set to :white_check_mark:"
           fi
           
-          if (steps.failure-step.outputs.status == 'success'); then:
+          echo "{{steps.failure-step.outputs.status}}"
+          if (steps.failure-step.outputs.status == 'success'); then
             export failure_step_result=:white_check_mark:
             echo "::set-env name=failure_step_result::$failure_step_result"
             echo "flag set to :white_check_mark:"
