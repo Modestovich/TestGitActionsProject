@@ -64,7 +64,7 @@ jobs:
     - name: Test loops in bash
       if: always()
       run: |
-         echo '${{toJSON(steps)}}' | jq -r 'to_entries|map(.key=.key)'
+         echo '${{toJSON(steps)}}' | jq -s 'to_entries|map(.key=.key)'
 #        echo '${{toJSON(steps)}}' | jq '."common"."outcome"'
 #        echo '${{toJSON(steps)}}' | jq -s '.'
 #        echo ${associativeArray[foo]}
