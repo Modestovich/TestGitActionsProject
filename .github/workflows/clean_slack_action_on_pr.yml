@@ -66,17 +66,9 @@ jobs:
       run: |
         echo '${{toJSON(steps)}}' | jq '."common"."outcome"'
         echo '${{toJSON(steps)}}' | jq -r 'to_entries|map((.key)=(.key|tostring))|.[]'
-        declare -A myarray
-        while IFS="=" read -r key value
-        do
-           myarray[$key]="$value"
-        done <<<('${{toJSON(steps)}}' | jq -r 'to_entries|map((.key)=(.key|tostring))|.[]')
-        
-        for key in "${!myarray[@]}"
-        do
-          echo "$key = ${myarray[$key]}"
-        done
-
+        arrayAsString=$(echo ${{toJSON(steps)}} | jq --raw-output '. | to_entries | map("[\(.key)]=\(.value)") | reduce .[] as $item ("associativeArray=("; . + $item + " ") + ")"')
+        declare -A "$arrayAsString"
+        echo ${associativeArray[foo]}
 #        for i in '${{toJSON(steps)}}' | jq -r 'to_entries|map((.key)=(.key|tostring))|.[]'; do
 #           echo "$i.key"
 #           echo "$i.value"
