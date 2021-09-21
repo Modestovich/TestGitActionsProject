@@ -15,6 +15,7 @@ jobs:
       id: common
       run: |
         echo "Reviewers: ${{toJSON(github.event.pull_request.head.repo.requested_reviewers)}},\nRepo url: ${{github.event.pull_request.head.repo.url}},\nTitle: ${{github.event.pull_request.title}},\nAvatar url:${{github.event.pull_request.head.user.avatar_url}}, "
+        
     - name: Notify PR status in Slack
       id: slack-simple
       env:
@@ -26,6 +27,9 @@ jobs:
     - name: Failure step
       id: failure-step
       run: ./gradle some
+      
+    - name: Print env
+      run: echo ${{toJSON(env)}}
       
     - name: Collect statuses
       if: always()
