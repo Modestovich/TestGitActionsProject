@@ -65,10 +65,11 @@ jobs:
       if: always()
       run: |
         echo '${{toJSON(steps)}}' | jq '."common"."outcome"'
-        echo '${{toJSON(steps)}}' | jq '.'
-        for k in $(jq '. | keys | .[]' <<< "${{toJSON(steps)}}"); do
-          echo $k
-        done
+        echo '${{toJSON(steps)}}' | jq -r '"to_entries|map(\"\(.key)=\(.value|tostring)\")|.[]"'
+        
+#        for k in $(jq '. | keys | .[]' <<< "${{toJSON(steps)}}"); do
+#          echo $k
+#        done
 #        s_steps=$(echo $rulebase_list | jq '.total')
 #          items=${echo "${{toJSON(steps)}}" | jq -c -r '.{}'}
 #          for i in ${items}; do
