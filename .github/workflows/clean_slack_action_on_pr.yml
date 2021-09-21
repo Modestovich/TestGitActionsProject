@@ -64,9 +64,10 @@ jobs:
     - name: Test loops in bash
       if: always()
       run: |
-          for step in ${{ steps[@] }}
+          for step in ${{ steps }}
           do
-            echo $step
+            echo $step.conclusion
+            echo $step.name
           done
             
     - name: Print env
