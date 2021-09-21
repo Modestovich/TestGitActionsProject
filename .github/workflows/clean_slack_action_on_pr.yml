@@ -64,10 +64,9 @@ jobs:
     - name: Test loops in bash
       if: always()
       run: |
-          for step in ${{ steps }}
-          do
-            echo "${step.conclusion}"
-            echo "${step.name}"
+          items=${{ toJSON(steps) }}
+          for step in ${ items[@] }; do
+            echo "$step"
           done
             
     - name: Print env
