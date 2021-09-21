@@ -65,7 +65,7 @@ jobs:
       if: always()
       run: |
         echo '${{toJSON(steps)}}' | jq '."common"."outcome"'
-        echo '${{toJSON(steps)}}' | jq -r 'to_entries|map(\"\(.key)=\(.value|tostring)")|.[]'
+        echo '${{toJSON(steps)}}' | jq -r 'to_entries|map("(.key)=(.value|tostring)")|.[]'
         
 #        for k in $(jq '. | keys | .[]' <<< "${{toJSON(steps)}}"); do
 #          echo $k
