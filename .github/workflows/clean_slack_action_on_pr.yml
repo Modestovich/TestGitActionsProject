@@ -28,9 +28,6 @@ jobs:
       id: failure-step
       run: ./gradle some
       
-    - name: Print env
-      run: echo ${{toJSON(env)}}
-      
     - name: Collect statuses
       if: always()
       id: collect-statuses
@@ -51,7 +48,10 @@ jobs:
             export failure_step_result=:x:
             echo "::set-env name=failure_step_result::$failure_step_result"
             echo "flag set to :x:"
+          fi
             
+    - name: Print env
+      run: echo "${{toJSON(env)}}"
           
     - name: Send pretty PR info
       if: always()
