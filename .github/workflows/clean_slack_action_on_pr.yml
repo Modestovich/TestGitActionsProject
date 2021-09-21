@@ -66,7 +66,6 @@ jobs:
       run: |
         echo '${{toJSON(steps)}}' | jq '."common"."outcome"'
         echo '${{toJSON(steps)}}' | jq -r 'to_entries|map((.key)=(.key|tostring))|.[]'
-        items = echo '${{toJSON(steps)}}' | jq -r 'to_entries|map((.key)=(.key|tostring))|.[]'
         for i in '${{toJSON(steps)}}' | jq -r 'to_entries|map((.key)=(.key|tostring))|.[]'; do
            echo "$i.key"
            echo "$i.value"
