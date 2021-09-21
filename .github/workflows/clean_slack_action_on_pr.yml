@@ -30,6 +30,8 @@ jobs:
       
     - name: Collect statuses
       if: always()
+      env:
+        ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
       id: collect-statuses
       run: |
           if (steps.common.outputs.status == 'success'); then
