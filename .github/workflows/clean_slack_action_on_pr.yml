@@ -66,7 +66,7 @@ jobs:
       run: |
         echo '${{toJSON(steps)}}' | jq '."common"."outcome"'
         echo '${{toJSON(steps)}}' | jq -r 'to_entries|map((.key)=(.key|tostring))|.[]'
-        arrayAsString=$(echo ${{toJSON(steps)}} | jq --raw-output '. | to_entries | map("[\(.key)]=\(.value)") | reduce .[] as $item ("associativeArray=("; . + $item + " ") + ")"')
+        arrayAsString=$(echo ${{toJSON(steps)}} | jq -r '. | to_entries|map((.key)=(.key|tostring))|.[] | reduce .[] as $item ("associativeArray=("; . + $item + " ") + ")"')
         declare -A "$arrayAsString"
 #        echo ${associativeArray[foo]}
 #        for i in '${{toJSON(steps)}}' | jq -r 'to_entries|map((.key)=(.key|tostring))|.[]'; do
