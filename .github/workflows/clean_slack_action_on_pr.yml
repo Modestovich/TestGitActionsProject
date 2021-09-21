@@ -70,7 +70,7 @@ jobs:
         while IFS="=" read -r key value
         do
            myarray[$key]="$value"
-        done < <('${{toJSON(steps)}}' | jq -r 'to_entries|map((.key)=(.key|tostring))|.[]')
+        done <<<('${{toJSON(steps)}}' | jq -r 'to_entries|map((.key)=(.key|tostring))|.[]')
         
         for key in "${!myarray[@]}"
         do
