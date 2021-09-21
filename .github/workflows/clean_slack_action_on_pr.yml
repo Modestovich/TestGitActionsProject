@@ -65,8 +65,9 @@ jobs:
       if: always()
       run: |
           items=${{ toJSON(steps) }}
-          for step in ${ items[@] }; do
-            echo "$step"
+          for i in ${!items[@]}; do
+            echo "key = $i"
+            echo "value = ${items[$i]}"
           done
             
     - name: Print env
