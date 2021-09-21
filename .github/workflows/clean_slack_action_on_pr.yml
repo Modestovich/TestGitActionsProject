@@ -35,18 +35,22 @@ jobs:
       id: collect-statuses
       run: |
           echo "${{toJSON(steps)}}"
-          if (${{steps.common.conclusion}} == 'success'); then
+          
+          echo "${{steps.common.outcome}}"
+          if (${{steps.common.outcome}} == 'success'); then
             export common_result=:white_check_mark:
             echo "::set-env name=common_result::$common_result"
             echo "flag set to :white_check_mark:"
           fi
           
+          echo "${{steps.slack-simple.outcome}}"
           if (${{steps.slack-simple.conclusion}} == 'success'); then
             export slack_simple_result=:white_check_mark:
             echo "::set-env name=slack_simple_result::$slack_simple_result"
             echo "flag set to :white_check_mark:"
           fi
           
+          echo "${{steps.failure-step.outcome}}"
           if (${{steps.failure-step.conclusion}} == 'success'); then
             export failure_step_result=:white_check_mark:
             echo "::set-env name=failure_step_result::$failure_step_result"
