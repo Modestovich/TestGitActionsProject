@@ -51,6 +51,7 @@ jobs:
           fi
             
     - name: Print env
+      if: always()
       run: echo "${{toJSON(env)}}"
           
     - name: Send pretty PR info
