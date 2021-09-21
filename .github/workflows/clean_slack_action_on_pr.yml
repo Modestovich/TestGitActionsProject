@@ -66,8 +66,8 @@ jobs:
       run: |
           for step in ${{ steps }}
           do
-            echo $step.conclusion
-            echo $step.name
+            echo "${step.conclusion}"
+            echo "${step.name}"
           done
             
     - name: Print env
