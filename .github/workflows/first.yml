@@ -66,27 +66,27 @@ jobs:
           name: best-app-ever
           path: app/build/outputs/apk/debug/app-debug.apk
           retention-days: 1
-      - name: Send email
-        uses: dawidd6/action-send-mail@v3
-        with:
+#      - name: Send email
+#        uses: dawidd6/action-send-mail@v3
+#        with:
             # Required mail server address:
-            server_address: smtp.gmail.com
+#            server_address: smtp.gmail.com
             # Required mail server port:
-            server_port: 465
+#            server_port: 465
             # Optional (recommended): mail server username:
-            username: modestovich9@gmail.com
+#            username: modestovich9@gmail.com
             # Optional (recommended) mail server password:
-            password: 20ofmarch1993year
+#            password: 20ofmarch1993year
             # Required mail subject:
-            subject: Nightly job result
+#            subject: Nightly job result
             # Required recipients' addresses:
-            to: modestovich9@gmail.com
+#            to: modestovich9@gmail.com
             # Required sender full name (address can be skipped):
-            from: Nightly job slave :D # <user@example.com>
+#            from: Nightly job slave :D # <user@example.com>
             # Optional whether this connection use TLS (default is true if server_port is 465)
-            secure: true
+#            secure: true
             # Optional plain body:
-            body: Nightly builds result
+#            body: Nightly builds result
             # Optional HTML body read from file:
             #html_body: file://README.html
             # Optional carbon copy recipients:
@@ -96,10 +96,10 @@ jobs:
             # Optional recipient of the email response:
             #reply_to: luke@example.com
             # Optional unsigned/invalid certificates allowance:
-            ignore_cert: true
+#            ignore_cert: true
             # Optional converting Markdown to HTML (set content_type to text/html too):
             #convert_markdown: true
             # Optional attachments:
-            attachments: best-app-ever
+#            attachments: best-app-ever
             # Optional priority: 'high', 'normal' (default) or 'low'
-            priority: high
+#            priority: high
