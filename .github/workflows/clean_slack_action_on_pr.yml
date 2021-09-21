@@ -64,7 +64,7 @@ jobs:
     - name: Test loops in bash
       if: always()
       run: |   
-        for k in $(jq '.children.values | keys | .[]' <<< "${{toJSON(steps)}}"); do
+        for k in $(jq '. | keys | .[]' <<< "${{toJSON(steps)}}"); do
           echo $k
         done
 #          items=${echo "${{toJSON(steps)}}" | jq -c -r '.{}'}
