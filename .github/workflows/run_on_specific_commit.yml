@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       commit_sha: 
-        description: "Commit SHA"
-        required: true
-        default: ${{github}}
+        description: "Commit SHA (by default from the head of the selected branch)"
+        required: false
+        default: ""
       flavor:
         description: "Flavor"
         required: true
@@ -18,9 +18,15 @@ on:
         
 jobs:
   run-script:
+  
     runs-on: ubuntu-latest
     
     steps:
+      - name: Build commit sha
+        run: |
+          echo "${{toJSON(github)}}"
+    
+    
       - uses: actions/checkout@v2
         with:
           ref: ${{ github.event.inputs.commit_sha }}
