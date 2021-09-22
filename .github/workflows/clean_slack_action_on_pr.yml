@@ -12,12 +12,12 @@ jobs:
 
     steps:
     - name: Print common data
-      id: Common step
+      id: common-step
       run: |
         echo "Reviewers: ${{toJSON(github.event.pull_request.head.repo.requested_reviewers)}},\nRepo url: ${{github.event.pull_request.head.repo.url}},\nTitle: ${{github.event.pull_request.title}},\nAvatar url:${{github.event.pull_request.head.user.avatar_url}}, "
         
     - name: Notify PR status in Slack
-      id: Slack simple
+      id: slack-simple
       env:
         SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
       uses: pullreminders/slack-action@master
@@ -25,14 +25,14 @@ jobs:
           args: '{\"channel\":\"C02E6Q6HAKV\",\"attachments\":[{\"pretext\":\"SIMPLE Creator: ${{github.event.pull_request.head.user.login}}\",\"text\": \"PR title: ${{github.event.pull_request.title}}\nReviewers: ${{github.event.pull_request.head.repo.requested_reviewers}}\n PR link: ${{github.event.pull_request.head.repo.url}} \" }]}'
           
     - name: Failure step
-      id: Failure step
+      id: failure-step
       run: ./gradle some
       
     - name: Collect statuses
       if: always()
       env:
         ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
-      id: Collect statuses
+      id: collect-statuses
       run: |
           echo "${{toJSON(steps)}}"
           
@@ -63,8 +63,7 @@ jobs:
           
     - name: Test loops in bash
       if: always()
-      env:
-        ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+      id: build-statuses-string
       run: |    
          transformedSteps="$( echo '${{toJSON(steps)}}' | jq -r 'to_entries|map(.key=.key)' )"
          statusesString=""
@@ -83,8 +82,7 @@ jobs:
            statusesString="${statusesString}*$key* | $value\n"; 
          done
          echo "statusesString=$statusesString"
-         export statusesResult=$statusesString
-         echo "::set-env name=statusesResult::$statusesString"
+         echo '::set-output name=statusesResult::$statusesString'
          
          someVar=$( echo '${{toJSON(steps)}}' | jq -r 'to_entries|map(.key=.key)' )
          echo "someVar=$someVar"
@@ -107,4 +105,4 @@ jobs:
         SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
       uses: pullreminders/slack-action@master
       with:
-          args: '{\"channel\":\"C02E6Q6HAKV\",\"blocks\":[{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"Hey guys :aw_yeah: \n Please review my PR. *If you do this fast, I will give you the huge Kudos :heart:*\"}},{\"type\":\"divider\"},{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"*<${{github.event.pull_request.head.repo.url}}|${{github.event.pull_request.title}}>*\nList of reviewers: ${{github.event.pull_request.head.repo.requested_reviewers}}\nJira ticket: !!Jira ticket}}\nCommits: !!Commits}}\"},\"accessory\":{\"type\":\"image\",\"image_url\":\"${{github.event.pull_request.head.user.avatar_url}}\",\"alt_text\":\"Creator Image\"}},{\"type\":\"divider\"},{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"*Tests execution results*\"}},{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"*Common* | ${{env.common_result}} \n*Slack simple* | ${{env.slack_simple_result}} \n*Failure result* | ${{env.failure_step_result}} \n Statuses reuslt start!!\n${{env.statusesResult}} \"}}]}'
+          args: '{\"channel\":\"C02E6Q6HAKV\",\"blocks\":[{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"Hey guys :aw_yeah: \n Please review my PR. *If you do this fast, I will give you the huge Kudos :heart:*\"}},{\"type\":\"divider\"},{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"*<${{github.event.pull_request.head.repo.url}}|${{github.event.pull_request.title}}>*\nList of reviewers: ${{github.event.pull_request.head.repo.requested_reviewers}}\nJira ticket: !!Jira ticket}}\nCommits: !!Commits}}\"},\"accessory\":{\"type\":\"image\",\"image_url\":\"${{github.event.pull_request.head.user.avatar_url}}\",\"alt_text\":\"Creator Image\"}},{\"type\":\"divider\"},{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"*Tests execution results*\"}},{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"Statuses result start!!\n${{steps.build-statuses-string.statusesResult}} \"}}]}'
