@@ -67,9 +67,13 @@ jobs:
          someVar=$( echo '${{toJSON(steps)}}' | jq -r 'to_entries|map(.key=.key)' )
          echo "someVar=$someVar"
          
+         echo "---------------------------------------"
+         
          echo "${someVar}" | jq '.'
          
-         for i in "${!someVar}"; do
+         echo "---------------------------------------"
+         
+         for i in "${!someVar[@]}"; do
           echo "key  : $i"
           echo "value: ${someVar[$i]}"
          done
