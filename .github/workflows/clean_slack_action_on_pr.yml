@@ -12,12 +12,12 @@ jobs:
 
     steps:
     - name: Print common data
-      id: common
+      id: Common step
       run: |
         echo "Reviewers: ${{toJSON(github.event.pull_request.head.repo.requested_reviewers)}},\nRepo url: ${{github.event.pull_request.head.repo.url}},\nTitle: ${{github.event.pull_request.title}},\nAvatar url:${{github.event.pull_request.head.user.avatar_url}}, "
         
     - name: Notify PR status in Slack
-      id: slack-simple
+      id: Slack simple
       env:
         SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
       uses: pullreminders/slack-action@master
@@ -25,14 +25,14 @@ jobs:
           args: '{\"channel\":\"C02E6Q6HAKV\",\"attachments\":[{\"pretext\":\"SIMPLE Creator: ${{github.event.pull_request.head.user.login}}\",\"text\": \"PR title: ${{github.event.pull_request.title}}\nReviewers: ${{github.event.pull_request.head.repo.requested_reviewers}}\n PR link: ${{github.event.pull_request.head.repo.url}} \" }]}'
           
     - name: Failure step
-      id: failure-step
+      id: Failure step
       run: ./gradle some
       
     - name: Collect statuses
       if: always()
       env:
         ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
-      id: collect-statuses
+      id: Collect statuses
       run: |
           echo "${{toJSON(steps)}}"
           
