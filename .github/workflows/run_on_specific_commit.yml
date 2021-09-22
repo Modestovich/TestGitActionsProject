@@ -25,9 +25,11 @@ jobs:
       - name: Build commit sha
         run: |
           commit_sha="${{toJSON(github.sha)}}"
-          if [ ${{ github.event.inputs.commit_sha }} != "" ] :
+          if [ ${{ github.event.inputs.commit_sha }} != "" ]; then :
             commit_sha=${{ github.event.inputs.commit_sha }}
+          fi
           echo "commit_sha=$commit_sha" >> $GITHUB_ENV
+          
     
       - uses: actions/checkout@v2
         with:
