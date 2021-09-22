@@ -6,7 +6,7 @@ on:
       commit_sha: 
         description: "Commit SHA"
         required: true
-        default: $(git rev-parse --short "$GITHUB_SHA")
+        default: $GITHUB_SHA
       flavor:
         description: "Flavor"
         required: true
