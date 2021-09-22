@@ -24,7 +24,7 @@ jobs:
     steps:
       - name: Build commit sha
         run: |
-          echo "${{toJSON(github)}}"
+          echo "${{toJSON(github.sha)}}"
     
     
       - uses: actions/checkout@v2
