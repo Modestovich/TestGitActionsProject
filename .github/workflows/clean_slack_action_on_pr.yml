@@ -66,6 +66,9 @@ jobs:
       run: |
          someVar=$( echo '${{toJSON(steps)}}' | jq -r 'to_entries|map(.key=.key)' )
          echo "$someVar"
+         for i in $somevar; do
+            echo $i
+         done
 #        echo '${{toJSON(steps)}}' | jq '."common"."outcome"'
 #        echo '${{toJSON(steps)}}' | jq -s '.'
 #        echo ${associativeArray[foo]}
