@@ -69,7 +69,7 @@ jobs:
          
          echo "---------------------------------------"
          
-         echo "${someVar}" | jq '.[]."key"'
+         echo "${someVar}" | jq 'to_entries|map(.[]."key"=.[]."value")'
          
          echo "---------------------------------------"
          
