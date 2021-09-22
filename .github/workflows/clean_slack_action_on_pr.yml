@@ -82,7 +82,8 @@ jobs:
            statusesString="${statusesString}*$key* | $value\n"; 
          done
          echo "statusesString=$statusesString"
-         echo '::set-output name=statusesResult::${statusesString}'
+         core.setOutput('statusesResult', $statusesString);
+         echo '::set-output name=statusesR1esult::${statusesString}'
          
          someVar=$( echo '${{toJSON(steps)}}' | jq -r 'to_entries|map(.key=.key)' )
          echo "someVar=$someVar"
