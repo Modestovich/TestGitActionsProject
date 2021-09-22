@@ -64,6 +64,19 @@ jobs:
     - name: Test loops in bash
       if: always()
       run: |
+      
+         statusesString=""
+         
+         for row in $(echo "${{toJSON(steps)}}" | jq -r '.[] | @base64'); do 
+            _jq() { 
+              echo "${row}" | base64 --decode | jq -r "${1}"; 
+           }; 
+           key=$(_jq '.key'); 
+           value=$(_jq '.value.outcome'); 
+           statusesString="${statusesString}$key : $value\n"; 
+         done
+         echo "statusesString=$statusesString"
+         
          someVar=$( echo '${{toJSON(steps)}}' | jq -r 'to_entries|map(.key=.key)' )
          echo "someVar=$someVar"
          
@@ -74,29 +87,6 @@ jobs:
          echo "------------------Values---------------------"
          
          echo "${someVar}" | jq '.[]."value"."outcome"'  
-         
-         
-         echo "------------------Array---------------------"
-         echo "${someVar}" | jq -s 'to_entries|map(key=.[].)|.[]'
-         
-         echo "---------------------------------------"
-         
-         echo "${someVar}" | jq -s 'to_entries|map(.[].key=.[].)|.[]'
-         
-         echo "---------------------------------------"
-         
-         for i in "${!someVar[@]}"; do
-          echo "key  : $i"
-          echo "value: ${someVar[$i]}"
-         done
-#        echo '${{toJSON(steps)}}' | jq '."common"."outcome"'
-#        echo '${{toJSON(steps)}}' | jq -s '.'
-#        echo ${associativeArray[foo]}
-#        for i in '${{toJSON(steps)}}' | jq -r 'to_entries|map((.key)=(.key|tostring))|.[]'; do
-#           echo "$i.key"
-#           echo "$i.value"
-#           echo "$i"
-#        done
                  
     - name: Print env
       if: always()
