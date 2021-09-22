@@ -1,0 +1,33 @@
+name: Commit run
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit_sha: 
+        description: "Commit SHA"
+        required: true
+      build_type:
+        description: "Build type"
+        required: true
+        
+        
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.inputs.commit_sha }}
+      
+      - name: Build debug apk
+        run: bash ./gradlew assembleDebug --stacktrace
+      
+      - name: Upload debug apk
+        id: upload
+        uses: actions/upload-artifact@v2
+        with:
+            name: best-app-ever
+            path: app/build/outputs/apk/debug/app-debug.apk
+            retention-days: 1
+        
