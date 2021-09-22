@@ -97,7 +97,9 @@ jobs:
                  
     - name: Print env
       if: always()
-      run: echo "${{toJSON(env)}}"
+      run: | 
+        echo "${{toJSON(env)}}"
+        echo "${{toJSON(steps)}}"
           
     - name: Send pretty PR info
       if: always()
