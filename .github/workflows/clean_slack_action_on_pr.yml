@@ -77,7 +77,7 @@ jobs:
          
          echo "---------------------------------------"
          
-         echo "${someVar}" | jq -s 'to_entries|map(."key"=."value")|.[]'
+         echo "${someVar}" | jq -s 'to_entries|map(.[].key=.value.outcome)|.[]'
          
          echo "---------------------------------------"
          
