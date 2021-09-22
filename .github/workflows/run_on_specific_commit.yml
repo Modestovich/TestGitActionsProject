@@ -6,7 +6,7 @@ on:
       commit_sha: 
         description: "Commit SHA"
         required: true
-        default: $GITHUB_SHA
+        default: echo "$GITHUB_SHA"
       flavor:
         description: "Flavor"
         required: true
