@@ -1,7 +1,7 @@
 name: Commit run
 
 on:
-  workflow_dispatch:
+  repository_dispatch:
     inputs:
       commit_sha: 
         description: "Commit SHA"
