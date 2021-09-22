@@ -63,6 +63,8 @@ jobs:
           
     - name: Test loops in bash
       if: always()
+      env:
+        ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
       run: |    
          transformedSteps="$( echo '${{toJSON(steps)}}' | jq -r 'to_entries|map(.key=.key)' )"
          statusesString=""
