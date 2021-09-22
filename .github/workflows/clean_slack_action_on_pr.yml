@@ -73,11 +73,11 @@ jobs:
          
          echo "------------------Values---------------------"
          
-         echo "${someVar}" | jq '.[]."value"'         
+         echo "${someVar}" | jq '.[]."value"."outcome"'         
          
          echo "---------------------------------------"
          
-         echo "${someVar}" | jq -r 'to_entries|map(.[]."key"=.[]."value")'
+         echo "${someVar}" | jq -r 'to_entries|map(.[]."key"=.[]."key")'
          
          echo "---------------------------------------"
          
