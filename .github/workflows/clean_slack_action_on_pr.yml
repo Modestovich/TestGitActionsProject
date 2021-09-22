@@ -65,9 +65,10 @@ jobs:
       if: always()
       run: |
          someVar=$( echo '${{toJSON(steps)}}' | jq -r 'to_entries|map(.key=.key)' )
-         echo "$someVar"
-         for i in $somevar; do
-            echo $i
+         echo "someVar=$someVar"
+         for i in "${!someVar[@]}"; do
+          echo "key  : $i"
+          echo "value: ${someVar[$i]}"
          done
 #        echo '${{toJSON(steps)}}' | jq '."common"."outcome"'
 #        echo '${{toJSON(steps)}}' | jq -s '.'
