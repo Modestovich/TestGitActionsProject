@@ -10,8 +10,9 @@ on:
         description: "Flavor"
         required: true
       build_type:
-        description: "Build type"
+        description: "Build type: debug/release"
         required: true
+        default: 'debug'
         
         
 jobs:
