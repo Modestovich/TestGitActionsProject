@@ -24,12 +24,14 @@ jobs:
     steps:
       - name: Build commit sha
         run: |
-          echo "${{toJSON(github)}}"
-    
+          commit_sha="${{toJSON(github.sha)}}"
+          if [ ${{ github.event.inputs.commit_sha }} != "" ] :
+            commit_sha=${{ github.event.inputs.commit_sha }}
+          echo "commit_sha=$commit_sha" >> $GITHUB_ENV
     
       - uses: actions/checkout@v2
         with:
-          ref: ${{ github.event.inputs.commit_sha }}
+          ref: ${{ env.commit_sha }}
       
       - name: Build debug apk
         run: |
