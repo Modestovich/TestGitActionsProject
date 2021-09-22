@@ -72,10 +72,17 @@ jobs:
               echo "${row}" | base64 --decode | jq -r "${1}"; 
            }; 
            key=$(_jq '.key'); 
-           value=$(_jq '.value.outcome'); 
-           statusesString="${statusesString}$key : $value\n"; 
+           value=$(_jq '.value.outcome');
+           if [ $value == 'success' ]; then
+             value=:white_check_mark:
+           else 
+             value=:x:
+           fi
+           statusesString="${statusesString}*$key* | $value\n"; 
          done
          echo "statusesString=$statusesString"
+         export statusesResult=$statusesString
+         echo "::set-env name=statusesResult::$statusesString"
          
          someVar=$( echo '${{toJSON(steps)}}' | jq -r 'to_entries|map(.key=.key)' )
          echo "someVar=$someVar"
@@ -98,4 +105,4 @@ jobs:
         SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
       uses: pullreminders/slack-action@master
       with:
-          args: '{\"channel\":\"C02E6Q6HAKV\",\"blocks\":[{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"Hey guys :aw_yeah: \n Please review my PR. *If you do this fast, I will give you the huge Kudos :heart:*\"}},{\"type\":\"divider\"},{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"*<${{github.event.pull_request.head.repo.url}}|${{github.event.pull_request.title}}>*\nList of reviewers: ${{github.event.pull_request.head.repo.requested_reviewers}}\nJira ticket: !!Jira ticket}}\nCommits: !!Commits}}\"},\"accessory\":{\"type\":\"image\",\"image_url\":\"${{github.event.pull_request.head.user.avatar_url}}\",\"alt_text\":\"Creator Image\"}},{\"type\":\"divider\"},{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"*Tests execution results*\"}},{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"*Common* | ${{env.common_result}} \n*Slack simple* | ${{env.slack_simple_result}} \n*Failure result* | ${{env.failure_step_result}} \"}}]}'
+          args: '{\"channel\":\"C02E6Q6HAKV\",\"blocks\":[{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"Hey guys :aw_yeah: \n Please review my PR. *If you do this fast, I will give you the huge Kudos :heart:*\"}},{\"type\":\"divider\"},{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"*<${{github.event.pull_request.head.repo.url}}|${{github.event.pull_request.title}}>*\nList of reviewers: ${{github.event.pull_request.head.repo.requested_reviewers}}\nJira ticket: !!Jira ticket}}\nCommits: !!Commits}}\"},\"accessory\":{\"type\":\"image\",\"image_url\":\"${{github.event.pull_request.head.user.avatar_url}}\",\"alt_text\":\"Creator Image\"}},{\"type\":\"divider\"},{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"*Tests execution results*\"}},{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"*Common* | ${{env.common_result}} \n*Slack simple* | ${{env.slack_simple_result}} \n*Failure result* | ${{env.failure_step_result}} \n Statuses reuslt start!!\n${{env.statusesResult}} \"}}]}'
