@@ -1,10 +1,13 @@
 name: Commit run
 
 on:
-  repository_dispatch:
+  workflow_dispatch:
     inputs:
       commit_sha: 
         description: "Commit SHA"
+        required: true
+      flavor:
+        description: "Flavor"
         required: true
       build_type:
         description: "Build type"
@@ -21,7 +24,7 @@ jobs:
           ref: ${{ github.event.inputs.commit_sha }}
       
       - name: Build debug apk
-        run: bash ./gradlew assembleDebug --stacktrace
+        run: bash ./gradlew assemble${{github.event.inputs.build_type^}} --stacktrace
       
       - name: Upload debug apk
         id: upload
