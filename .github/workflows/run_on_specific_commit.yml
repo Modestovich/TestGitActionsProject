@@ -25,8 +25,9 @@ jobs:
       
       - name: Build debug apk
         run: |
+          flavor=${{github.event.inputs.flavor}}
           buildType=${{github.event.inputs.build_type}}
-          bash ./gradlew assemble${buildType^} --stacktrace
+          bash ./gradlew assemble${flavor^}${buildType^} --stacktrace
       
       - name: Upload debug apk
         id: upload
