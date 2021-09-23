@@ -16,10 +16,11 @@ jobs:
       run: |
         echo "Reviewers: ${{toJSON(github.event.pull_request.head.repo.requested_reviewers)}},\nRepo url: ${{github.event.pull_request.head.repo.url}},\nTitle: ${{github.event.pull_request.title}},\nAvatar url:${{github.event.pull_request.head.user.avatar_url}}, "
 
-    - name: Print common data
+    - name: Print PR data
       id: print-repo-data
       run: |
-        echo "PR_data: ${{toJSON(github.event.pull_request._link.html.href)}}"
+        echo "PR_data: ${{toJSON(github.event.pull_request._links.html.href)}}"
+        echo "PR_data_full: ${{toJSON(github.event.pull_request)}}"
         
     - name: Notify PR status in Slack
       id: slack-simple
