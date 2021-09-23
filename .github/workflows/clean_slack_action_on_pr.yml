@@ -77,7 +77,7 @@ jobs:
          transformedSteps="$( echo '${{toJSON(steps)}}' | jq -r 'to_entries|map(.key=.key)' )"
          statusesString=""
          
-         for row in $(echo "$transformedSteps" | jq -r '. | .[] | @base64'); do 
+         for row in $(echo "$transformedSteps" | jq -r '. | .[1:${#transformedSteps}] | @base64'); do 
             _jq() { 
               echo "${row}" | base64 --decode | jq -r "${1}"; 
            };
