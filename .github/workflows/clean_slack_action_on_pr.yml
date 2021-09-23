@@ -71,7 +71,6 @@ jobs:
       if: always()
       id: build-statuses-string
       run: |    
-         idLength=25
          transformedSteps="$( echo '${{toJSON(steps)}}' | jq -r 'to_entries|map(.key=.key)' )"
          statusesString=""
          
@@ -81,9 +80,8 @@ jobs:
            };
            _prepareKeyLength() {
               id=${1}
-              idLength=${2}
-              if [ ${#id} < $idLength ]; then 
-                countOfMissingChars=$(expr $idLength - ${#id}) ; 
+              if [ ${#id} < 25 ]; then 
+                countOfMissingChars=$(expr 25 - ${#id}) ; 
                 printf -v padding %${countOfMissingChars}s;
                 final="$padding$id"; 
                 echo ${final};
@@ -93,7 +91,7 @@ jobs:
            }
            key=$(_jq '.key'); 
            echo "key before=[$key], length=${#key}"
-           key=$(_prepareKeyLength $key $idLength);
+           key=$(_prepareKeyLength $key);
            echo "key after=[$key], length=${#key}"
            value=$(_jq '.value.outcome');
            echo "key=$key, value=$value"
