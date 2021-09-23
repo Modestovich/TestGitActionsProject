@@ -78,21 +78,22 @@ jobs:
          statusesString=""
          index=0
          for row in $(echo "$transformedSteps" | jq -r '. | .[] | @base64'); do 
-            _jq() { 
+           _jq() { 
               echo "${row}" | base64 --decode | jq -r "${1}"; 
            };
-           if (index != 0); then
-             key=$(_jq '.key'); 
-             value=$(_jq '.value.outcome');
-             echo "key=$key, value=$value"
-            if [ $value == 'success' ]; then
-               value=:white_check_mark:
-            else 
-               value=:x:
-            fi
-            statusesString="${statusesString}*$key* | $value\n"; 
-          fi
-          index=$((index+1))
+           key=$(_jq '.key'); 
+           value=$(_jq '.value.outcome');
+           echo "key=$key, value=$value"
+           if [ $value == 'success' ]; then
+             value=:white_check_mark:
+           else 
+             value=:x:
+           fi
+           if [ $index != 0 ]; then
+             statusesString="${statusesString}*$key* | $value\n"; 
+           fi
+           index=$((index+1))
+           echo "index=$index"
          done
          echo "statusesString=$statusesString"
          echo '::set-output name=statusesR1esult::${statusesString}'
