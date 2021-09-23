@@ -76,6 +76,7 @@ jobs:
       run: |    
          transformedSteps="$( echo '${{toJSON(steps)}}' | jq -r 'to_entries|map(.key=.key)' )"
          statusesString=""
+         index=0
          
          for row in $(echo "$transformedSteps" | jq -r '. | .[] | @base64'); do 
             _jq() { 
@@ -92,18 +93,21 @@ jobs:
                 echo ${id:0:40};
               fi
            };
-           key=$(_jq '.key'); 
-           echo "key before=[$key], length=${#key}"
-           key=$(_prepareKeyLength $key);
-           echo "key after=[$key], length=${#key}"
-           value=$(_jq '.value.outcome');
-           echo "key=$key, value=$value"
-           if [ $value == 'success' ]; then
-             value=:white_check_mark:
-           else 
-             value=:x:
-           fi
-           statusesString="${statusesString}*$key* | $value\n"; 
+           if (index != 0); then
+             key=$(_jq '.key'); 
+             echo "key before=[$key], length=${#key}"
+             key=$(_prepareKeyLength $key);
+             echo "key after=[$key], length=${#key}"
+             value=$(_jq '.value.outcome');
+             echo "key=$key, value=$value"
+            if [ $value == 'success' ]; then
+               value=:white_check_mark:
+            else 
+               value=:x:
+            fi
+            statusesString="${statusesString}*$key* | $value\n"; 
+          fi
+          index=$((index+1))
          done
          echo "statusesString=$statusesString"
          echo '::set-output name=statusesR1esult::${statusesString}'
