@@ -102,6 +102,9 @@ jobs:
          someVar=$( echo '${{toJSON(steps)}}' | jq -r 'to_entries|map(.key=.key)' )
          echo "someVar=$someVar"
          
+         prReviewers="$( echo '${{toJSON(github.event.pull_request.requested_reviewers)}}' | jq -r '. | map(.login) | join(",")' )"
+         echo "prReviewers=$prReviewers" >> $GITHUB_ENV
+         
          echo "------------------Keys---------------------"
          
          echo "${someVar}" | jq '.[]."key"'         
@@ -123,4 +126,4 @@ jobs:
         SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
       uses: pullreminders/slack-action@master
       with:
-          args: '{\"channel\":\"C02E6Q6HAKV\",\"blocks\":[{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"Hey guys :aw_yeah: \n Please review my PR. *If you do this fast, I will give you the huge Kudos :heart:*\"}},{\"type\":\"divider\"},{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"*<${{toJSON(github.event.pull_request._links.html.href)}}|${{github.event.pull_request.title}}>*\nList of reviewers: ${{toJSON(github.event.pull_request.requested_reviewers)}}\nJira ticket: !!Jira ticket!!\nCommits count: ${{github.event.pull_request.commits}}\"},\"accessory\":{\"type\":\"image\",\"image_url\":\"${{github.event.pull_request.head.user.avatar_url}}\",\"alt_text\":\"Creator Image\"}},{\"type\":\"divider\"},{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"*Tests execution results*\"}},{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"${{env.statusesResult}} \"}}]}'
+          args: '{\"channel\":\"C02E6Q6HAKV\",\"blocks\":[{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"Hey guys :aw_yeah: \n Please review my PR. *If you do this fast, I will give you the huge Kudos :heart:*\"}},{\"type\":\"divider\"},{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"*<${{toJSON(github.event.pull_request._links.html.href)}}|${{github.event.pull_request.title}}>*\nList of reviewers: ${{env.prReviewers)}}\nAssignee: ${{toJSON(github.event.pull_request.assignee.login)}}\nJira ticket: !!Jira ticket!!\nCommits count: ${{github.event.pull_request.commits}}\"},\"accessory\":{\"type\":\"image\",\"image_url\":\"${{github.event.pull_request.head.user.avatar_url}}\",\"alt_text\":\"Creator Image\"}},{\"type\":\"divider\"},{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"*Tests execution results*\"}},{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"${{env.statusesResult}} \"}}]}'
