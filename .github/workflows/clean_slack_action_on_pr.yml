@@ -17,6 +17,7 @@ jobs:
     - name: Print common data
       id: common-step
       run: |
+        echo "jobs=${{toJSON(jobs)}}"
         echo "Reviewers: ${{toJSON(github.event.pull_request.head.repo.requested_reviewers)}},\nRepo url: ${{github.event.pull_request.head.repo.url}},\nTitle: ${{github.event.pull_request.title}},\nAvatar url:${{github.event.pull_request.head.user.avatar_url}}, "
 
     - name: Print PR data
