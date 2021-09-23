@@ -81,7 +81,7 @@ jobs:
            };
            _prepareKeyLength() {
               id=${1}
-              if [ ${#id} < idLength ]; then 
+              if [ ${#id} < $idLength ]; then 
                 countOfMissingChars=$(expr $idLength - ${#id}) ; 
                 printf -v padding %${countOfMissingChars}s;
                 final="$padding$id"; 
