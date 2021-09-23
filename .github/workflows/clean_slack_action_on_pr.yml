@@ -81,15 +81,11 @@ jobs:
            };
            _prepareKeyLength() {
               id=${1}
-              echo "id=${id}"
               if [ ${#id} < idLength ]; then 
                 countOfMissingChars=$(expr $idLength - ${#id}) ; 
-                echo "missing=$countOfMissingChars"; 
                 printf -v padding %${countOfMissingChars}s;
-                final="$padding${string}"; 
-                echo "padLength:" ${#padding}; 
-                echo $final; 
-                echo ${#final}
+                final="$padding$id"; 
+                echo ${final}
               else 
                 echo ${id:0:40}
               fi
