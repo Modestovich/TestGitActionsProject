@@ -71,15 +71,33 @@ jobs:
       if: always()
       id: build-statuses-string
       run: |    
+         idLength=25
          transformedSteps="$( echo '${{toJSON(steps)}}' | jq -r 'to_entries|map(.key=.key)' )"
          statusesString=""
          
          for row in $(echo "$transformedSteps" | jq -r '. | .[] | @base64'); do 
             _jq() { 
               echo "${row}" | base64 --decode | jq -r "${1}"; 
-           }; 
+           };
+           _prepareKeyLength() {
+              id=${1}
+              echo "id=${id}"
+              if [ ${#id} < idLength ]; then 
+                countOfMissingChars=$(expr $idLength - ${#id}) ; 
+                echo "missing=$countOfMissingChars"; 
+                printf -v padding %${countOfMissingChars}s;
+                final="$padding${string}"; 
+                echo "padLength:" ${#padding}; 
+                echo $final; 
+                echo ${#final}
+              else 
+                echo ${id:0:40}
+              fi
+           }
            key=$(_jq '.key'); 
+           key=$(_prepareKeyLength $key)
            value=$(_jq '.value.outcome');
+           echo "key=$key, value=$value"
            if [ $value == 'success' ]; then
              value=:white_check_mark:
            else 
