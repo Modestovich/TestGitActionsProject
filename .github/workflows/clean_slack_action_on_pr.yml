@@ -19,7 +19,7 @@ jobs:
     - name: Print common data
       id: print-repo-data
       run: |
-        echo "PR_data: ${{toJSON(github.event.pull_request)}}"
+        echo "PR_data: ${{toJSON(github.event.pull_request._link.html.href)}}"
         
     - name: Notify PR status in Slack
       id: slack-simple
