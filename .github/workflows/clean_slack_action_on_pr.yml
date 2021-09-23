@@ -85,13 +85,15 @@ jobs:
                 countOfMissingChars=$(expr $idLength - ${#id}) ; 
                 printf -v padding %${countOfMissingChars}s;
                 final="$padding$id"; 
-                echo ${final}
+                echo ${final};
               else 
-                echo ${id:0:40}
+                echo ${id:0:40};
               fi
            }
            key=$(_jq '.key'); 
-           key=$(_prepareKeyLength $key)
+           echo "key before=[$key], length=${#key}"
+           key=$(_prepareKeyLength $key);
+           echo "key after=[$key], length=${#key}"
            value=$(_jq '.value.outcome');
            echo "key=$key, value=$value"
            if [ $value == 'success' ]; then
