@@ -11,6 +11,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - uses: actions/checkout@v2
+    - id: checkout
+    
     - name: Print common data
       id: common-step
       run: |
