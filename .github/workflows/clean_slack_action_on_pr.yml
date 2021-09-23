@@ -81,6 +81,7 @@ jobs:
            };
            _prepareKeyLength() {
               id=${1}
+              idLength=${2}
               if [ ${#id} < $idLength ]; then 
                 countOfMissingChars=$(expr $idLength - ${#id}) ; 
                 printf -v padding %${countOfMissingChars}s;
@@ -92,7 +93,7 @@ jobs:
            }
            key=$(_jq '.key'); 
            echo "key before=[$key], length=${#key}"
-           key=$(_prepareKeyLength $key);
+           key=$(_prepareKeyLength $key $idLength);
            echo "key after=[$key], length=${#key}"
            value=$(_jq '.value.outcome');
            echo "key=$key, value=$value"
