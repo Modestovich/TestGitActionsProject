@@ -2,8 +2,10 @@ name: Android CI test new
 
 on:
     pull_request:
-      types:
-        - opened
+      #types:
+      #  - opened
+      branches: 
+        - '*'
            
     workflow_dispatch: # to be able to run action manually 
 
