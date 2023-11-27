@@ -1,0 +1,63 @@
+name: Create missing tags on the release branches
+
+on:
+  push:
+    branches:
+      - 'release/v*/*'
+
+jobs:
+
+  delete-release-tag:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      id: checkout
+      with:
+        fetch-depth: 0
+
+    - name: Remove tag from the release branch head
+      run: |
+        branch=${{ github.ref_name }}
+        tagName=${branch##*/}
+        
+        git config user.name "${GITHUB_ACTOR}"
+        git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+          
+        if [ $(git tag -l "$tagName") ]; then
+          echo "Tag [$tagName] exists. Deleting."
+          $(git push --delete origin $tagName)
+        else 
+          echo "Tag [$tagName] does not exist. Skipping."
+        fi
+        echo "Done with branch[$branch] and tag[$tagName]"
+
+  create-release-tags:
+    needs: delete-release-tag
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        id: checkout
+        with:
+          fetch-depth: 0
+
+      - name: Add tag to the release branch head
+        run: |
+          branch=${{ github.ref_name }}
+          tagName=${branch##*/}
+          commitHash=$(git log -n 1 --pretty=format:'%H' $branch)
+
+          git config user.name "${GITHUB_ACTOR}"
+          git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+             
+          if [ $(git tag -l "$tagName") ]; then
+            echo "Tag [$tagName] already exists. Skip." 
+          else
+            echo "There is no tag [$tagName]. Pushing commit=[$commitHash] to tag=[$tagName] with notes='Release ${tagName:1}'"
+
+            $(git tag -a $tagName $commitHash -m "Release version ${tagName:1}")
+            $(git push --force origin $tagName)
+          fi
+
+          echo "Done with branch[$branch] and tag[$tagName]"
