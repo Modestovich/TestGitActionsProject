@@ -1,0 +1,45 @@
+name: PR tags
+
+on:
+  pull_request:
+    branches: [ master ]
+
+  workflow_dispatch:
+
+jobs:
+  slack:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      id: checkout
+      with:
+        fetch-depth: 0
+
+    - name: Print common data
+      id: common-step
+      run: |
+        stringBranches=$(git branch -r | grep -i 'origin/release/v*/*')
+        arrayResult=($stringBranches)
+        for value in "${arrayResult[@]}"
+        do
+          tagName=${value##*/}
+          echo "tag=$tagName"
+          commitHash=$(git log -n 1 --pretty=format:'%H' $value)
+          echo "commit=$commitHash"
+          echo "Pushing commit=[$commitHash] to tag=[$tagName] with notes='Release ${tagName:1}'"
+          git config user.name "${GITHUB_ACTOR}"
+          git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+        
+          echo "is tag available? $(git ls-remote --tags origin | grep $tagName)"
+          $(git tag -a $tagName $commitHash -m "Release ${tagName:1}")
+          $(git push origin $tagName)
+          echo "Done"
+        done
+      #echo "Reviewers: ${{toJSON(github.event.pull_request.head.repo.requested_reviewers)}},\nRepo url: ${{github.event.pull_request.head.repo.url}},\nTitle: ${{github.event.pull_request.title}},\nAvatar url:${{github.event.pull_request.head.user.avatar_url}}, "
+
+#    - name: Print PR data
+#      id: print-repo-data
+#      run: |
+#        echo "PR_data: ${{toJSON(github.event.pull_request._links.html.href)}}"
+#        echo "PR_data_full: ${{toJSON(github.event.pull_request)}}"
