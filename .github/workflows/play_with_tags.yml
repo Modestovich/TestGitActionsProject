@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  refresh-release-tag:
+  delete-release-tags:
     runs-on: ubuntu-latest
 
     steps:
@@ -35,27 +35,37 @@ jobs:
           echo "Done with branch[$branch] and tag[$tagName]"
         done
 
-    - name: Setting up tags to release branches
-      id: setup-releases-tags
-      run: |
-        stringBranches=$(git branch -r | grep -i 'origin/release/v*/*')
-        branches=($stringBranches)
-        for branch in "${branches[@]}"
-        do
-          tagName=${branch##*/}
-          commitHash=$(git log -n 1 --pretty=format:'%H' $branch)
+  create-release-tags:
+    needs: delete-release-tags
+    runs-on: ubuntu-latest
 
-          git config user.name "${GITHUB_ACTOR}"
-          git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
-             
-          if [ $(git tag -l "$tagName") ]; then
-            echo "Tag [$tagName] already exists. Skip." 
-          else
-            echo "There is no tag [$tagName]. Pushing commit=[$commitHash] to tag=[$tagName] with notes='Release ${tagName:1}'"
+    steps:
+      - uses: actions/checkout@v2
+        id: checkout
+        with:
+          fetch-depth: 0
 
-            $(git tag -a $tagName $commitHash -m "Release version ${tagName:1}")
-            $(git push --force origin $tagName)
-          fi
-
-          echo "Done with branch[$branch] and tag[$tagName]"
-        done
+      - name: Setting up tags to release branches
+        id: setup-releases-tags
+        run: |
+          stringBranches=$(git branch -r | grep -i 'origin/release/v*/*')
+          branches=($stringBranches)
+          for branch in "${branches[@]}"
+          do
+            tagName=${branch##*/}
+            commitHash=$(git log -n 1 --pretty=format:'%H' $branch)
+  
+            git config user.name "${GITHUB_ACTOR}"
+            git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+               
+            if [ $(git tag -l "$tagName") ]; then
+              echo "Tag [$tagName] already exists. Skip." 
+            else
+              echo "There is no tag [$tagName]. Pushing commit=[$commitHash] to tag=[$tagName] with notes='Release ${tagName:1}'"
+  
+              $(git tag -a $tagName $commitHash -m "Release version ${tagName:1}")
+              $(git push --force origin $tagName)
+            fi
+  
+            echo "Done with branch[$branch] and tag[$tagName]"
+          done
