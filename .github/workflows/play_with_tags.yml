@@ -1,13 +1,10 @@
-name: PR tags
+name: Create missing tags on the release branches
 
 on:
-  pull_request:
-    branches: [ master ]
-
   workflow_dispatch:
 
 jobs:
-  slack:
+  refresh-release-tag:
     runs-on: ubuntu-latest
 
     steps:
@@ -16,30 +13,49 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Print common data
-      id: common-step
+    - name: Cleanup release branches
+      id: cleanup-releases
       run: |
         stringBranches=$(git branch -r | grep -i 'origin/release/v*/*')
-        arrayResult=($stringBranches)
-        for value in "${arrayResult[@]}"
+        branches=($stringBranches)
+        for branch in "${branches[@]}"
         do
-          tagName=${value##*/}
-          echo "tag=$tagName"
-          commitHash=$(git log -n 1 --pretty=format:'%H' $value)
-          echo "commit=$commitHash"
-          echo "Pushing commit=[$commitHash] to tag=[$tagName] with notes='Release ${tagName:1}'"
+          tagName=${branch##*/}
+          commitHash=$(git log -n 1 --pretty=format:'%H' $branch)
+        
           git config user.name "${GITHUB_ACTOR}"
           git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
-        
-          echo "is tag available? $(git ls-remote --tags origin | grep $tagName)"
-          $(git tag -a $tagName $commitHash -m "Release ${tagName:1}")
-          $(git push origin $tagName)
-          echo "Done"
+          
+          if [ $(git tag -l "$tagName") ]; then
+            echo "Tag [$tagName] exists. Deleting."
+            $(git push --delete origin $tagName)
+          else 
+            echo "Tag [$tagName] does not exist. Skipping."
+          fi
+          echo "Done with branch[$branch] and tag[$tagName]"
         done
-      #echo "Reviewers: ${{toJSON(github.event.pull_request.head.repo.requested_reviewers)}},\nRepo url: ${{github.event.pull_request.head.repo.url}},\nTitle: ${{github.event.pull_request.title}},\nAvatar url:${{github.event.pull_request.head.user.avatar_url}}, "
 
-#    - name: Print PR data
-#      id: print-repo-data
-#      run: |
-#        echo "PR_data: ${{toJSON(github.event.pull_request._links.html.href)}}"
-#        echo "PR_data_full: ${{toJSON(github.event.pull_request)}}"
+    - name: Setting up tags to release branches
+      id: setup-releases-tags
+      run: |
+        stringBranches=$(git branch -r | grep -i 'origin/release/v*/*')
+        branches=($stringBranches)
+        for branch in "${branches[@]}"
+        do
+          tagName=${branch##*/}
+          commitHash=$(git log -n 1 --pretty=format:'%H' $branch)
+
+          git config user.name "${GITHUB_ACTOR}"
+          git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+             
+          if [ $(git tag -l "$tagName") ]; then
+            echo "Tag [$tagName] already exists. Skip." 
+          else
+            echo "There is no tag [$tagName]. Pushing commit=[$commitHash] to tag=[$tagName] with notes='Release ${tagName:1}'"
+
+            $(git tag -a $tagName $commitHash -m "Release version ${tagName:1}")
+            $(git push --force origin $tagName)
+          fi
+
+          echo "Done with branch[$branch] and tag[$tagName]"
+        done

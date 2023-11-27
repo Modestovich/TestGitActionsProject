@@ -103,3 +103,16 @@ jobs:
 #            attachments: best-app-ever
             # Optional priority: 'high', 'normal' (default) or 'low'
 #            priority: high
+
+
+
+#          echo $(git ls-remote --tags origin | grep v2.0.0.1)
+#          existingTagRef=$(git ls-remote --tags origin | grep $tagName)
+#          if [ -z "existingTagRef" ]
+#          then
+#            echo "NO TAG. Pushing new one"
+#            $(git tag -a $tagName $commitHash -m "Release version ${tagName:1}")
+#            $(git push origin $tagName)
+#          else
+#            echo "TAG ALREADY EXISTS. Skip"
+#          fi
