@@ -16,6 +16,15 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    /*testOptions.unitTests.all {
+        testLogging {
+            outputs.upToDateWhen {false}
+            events "passed", "failed", "standardError"
+            showCauses true
+            showExceptions true
+        }
+    }*/
+
     buildTypes {
         release {
             minifyEnabled false
