@@ -1,0 +1,59 @@
+name: Pass parent if all children succeed
+
+on:
+  push:
+
+jobs:
+  run-check1:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      id: checkout
+
+    - name: Failed test
+      id: failed-test
+      run: |
+        echo "Running test" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
+        echo "Test result: Failure ❌" >> $GITHUB_STEP_SUMMARY
+        exit 1
+
+  run-check2:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        id: checkout
+
+      - name: Success test
+        id: success-test
+        run: |
+          echo "Running test" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY # this is a blank line
+          echo "Test result: Success ✅" >> $GITHUB_STEP_SUMMARY
+          exit 0
+
+  run-check3:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        id: checkout
+
+      - name: Run UTs
+        id: uts-test
+        run: |
+          ./gradlew testDebugUnitTest
+  
+
+  verify-if-successful:
+    runs-on: ubuntu-latest
+    needs: [run-check1, run-check2, run-check3]
+    if: always() && !contains(needs.*.result, 'failure')
+
+    steps:
+      - name: Collect results
+        id: setup-releases-tags
+        run: |
+          exit 0
