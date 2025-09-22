@@ -65,27 +65,6 @@ jobs:
           echo "Using baseline: $BASELINE_BRANCH"
           echo "baseline_branch=$BASELINE_BRANCH" >> $GITHUB_OUTPUT
 
-      - name: Update version files if custom versions provided
-        run: |
-          # Update games version if provided
-          if [[ -n "${{ inputs.games_version }}" ]]; then
-            echo "Updating games version to ${{ inputs.games_version }}"
-            # Update games submodule or version reference
-            if [[ -f "games_versions.gradle" ]]; then
-              sed -i "s/GAMES_VERSION = .*/GAMES_VERSION = '${{ inputs.games_version }}'/" games_versions.gradle
-            fi
-          fi
-
-          # Update AMS version if provided
-          if [[ -n "${{ inputs.ams_version }}" ]]; then
-            echo "Updating AMS version to ${{ inputs.ams_version }}"
-            sed -i "s/AMS_SDK_VERSION = .*/AMS_SDK_VERSION = '${{ inputs.ams_version }}'/" versions.gradle
-          fi
-
-          # Update Aura SDK version
-          echo "Updating Aura SDK version to ${{ inputs.sdk_version }}"
-          sed -i "s/SDK_VERSION = .*/SDK_VERSION = '${{ inputs.sdk_version }}'/" versions.gradle
-
       - name: Build APK
         run: |
           FLAVOR_CAPITALIZED="$(echo '${{ inputs.flavor }}' | sed 's/^./\U&/')"
