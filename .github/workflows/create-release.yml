@@ -161,7 +161,7 @@ jobs:
             **Release Version:** ${{ steps.apk_info.outputs.version_name }}
             **Version Code:** ${{ steps.apk_info.outputs.version_code }}
             **Brand/Flavor:** ${{ steps.apk_info.outputs.brand }}
-            **Aura SDK Version:** ${{ inputs.aura_sdk_version }}
+            **SDK Version:** ${{ inputs.sdk_version }}
             ${{ inputs.games_version && format('**Games Version:** {0}', inputs.games_version) || '' }}
             ${{ inputs.ams_version && format('**AMS Version:** {0}', inputs.ams_version) || '' }}
             **App Target SDK:** ${{ steps.apk_info.outputs.target_sdk }}
@@ -196,7 +196,7 @@ jobs:
           - **Tag:** v${{ steps.apk_info.outputs.version_name }}-${{ inputs.flavor }}-${{ github.run_number }}
 
           ## Build Configuration
-          - **Aura SDK Version:** ${{ inputs.sdk_version }}
+          - **SDK Version:** ${{ inputs.sdk_version }}
           ${{ inputs.games_version && format('- **Games Version:** {0}', inputs.games_version) || '' }}
           ${{ inputs.ams_version && format('- **AMS Version:** {0}', inputs.ams_version) || '' }}
           - **Target SDK:** ${{ steps.apk_info.outputs.target_sdk }}
