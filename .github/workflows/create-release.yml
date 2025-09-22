@@ -1,4 +1,4 @@
-name: Create OOBE release
+name: Create release
 
 on:
   workflow_dispatch:
@@ -31,10 +31,8 @@ on:
 
 jobs:
   create-release:
-    runs-on:
-      group: aura-runner-group
-      labels:
-        - actions-runner-main-hosted-8x32
+    runs-on: 
+      ubuntu-latest
 
     permissions:
       id-token: write
@@ -43,10 +41,6 @@ jobs:
 
     env:
       WORKING_BRANCH: ${{ github.head_ref || github.ref_name }}
-      GH_AURA_CI_USERNAME: ${{ secrets.CI_ARTIFACTORY_USER }}
-      GH_AURA_CI_PASSWORD: ${{ secrets.CI_ARTIFACTORY_PASSWORD }}
-      CI_ARTIFACTORY_USER: ${{ secrets.CI_ARTIFACTORY_USER }}
-      CI_ARTIFACTORY_PASSWORD: ${{ secrets.CI_ARTIFACTORY_PASSWORD }}
 
     steps:
       - name: Setup Java
