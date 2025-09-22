@@ -50,18 +50,8 @@ jobs:
           distribution: 'adopt'
 
       - name: Checkout repository
-        uses: ironsource-aura/aura-shared-gha/actions/git_checkout@main
-        with:
-          repository: 'aura-android-oobe'
-          aura_github_actions_app_private_key: ${{ secrets.AURA_GITHUB_ACTIONS_APP_PRIVATE_KEY }}
-          branch: ${{ env.WORKING_BRANCH }}
-          submodules: 'recursive'
-
-      - name: AWS login
-        uses: ironsource-aura/aura-shared-gha/actions/aws_login@main
-        with:
-          role_to_assume: arn:aws:iam::805787217936:role/jenkins-infra-031d444
-          role_session_name: OOBE-Release-Creation
+        uses: actions/checkout@v4
+        id: checkout
 
       - name: Install aapt
         run: |
