@@ -1,0 +1,251 @@
+name: Create OOBE release
+
+on:
+  workflow_dispatch:
+    inputs:
+      baseline_version:
+        description: 'Base branch for comparison (required)'
+        required: true
+        type: string
+        default: 'main'
+      flavor:
+        description: 'Product Flavor (required)'
+        required: true
+        type: choice
+        options:
+          - 'adops'
+          - 'native'
+          - 'some more'
+      sdk_version:
+        description: 'SDK version (required)'
+        required: true
+        type: string
+      games_version:
+        description: 'Games version'
+        required: false
+        type: string
+      ams_version:
+        description: 'AMS version'
+        required: false
+        type: string
+
+jobs:
+  create-release:
+    runs-on:
+      group: aura-runner-group
+      labels:
+        - actions-runner-main-hosted-8x32
+
+    permissions:
+      id-token: write
+      contents: write
+      pull-requests: read
+
+    env:
+      WORKING_BRANCH: ${{ github.head_ref || github.ref_name }}
+      GH_AURA_CI_USERNAME: ${{ secrets.CI_ARTIFACTORY_USER }}
+      GH_AURA_CI_PASSWORD: ${{ secrets.CI_ARTIFACTORY_PASSWORD }}
+      CI_ARTIFACTORY_USER: ${{ secrets.CI_ARTIFACTORY_USER }}
+      CI_ARTIFACTORY_PASSWORD: ${{ secrets.CI_ARTIFACTORY_PASSWORD }}
+
+    steps:
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'adopt'
+
+      - name: Checkout repository
+        uses: ironsource-aura/aura-shared-gha/actions/git_checkout@main
+        with:
+          repository: 'aura-android-oobe'
+          aura_github_actions_app_private_key: ${{ secrets.AURA_GITHUB_ACTIONS_APP_PRIVATE_KEY }}
+          branch: ${{ env.WORKING_BRANCH }}
+          submodules: 'recursive'
+
+      - name: AWS login
+        uses: ironsource-aura/aura-shared-gha/actions/aws_login@main
+        with:
+          role_to_assume: arn:aws:iam::805787217936:role/jenkins-infra-031d444
+          role_session_name: OOBE-Release-Creation
+
+      - name: Install aapt
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y aapt
+
+      - name: Determine baseline branch
+        id: baseline
+        run: |
+          BASELINE_BRANCH="${{ inputs.baseline_version }}"
+          echo "Using baseline: $BASELINE_BRANCH"
+          echo "baseline_branch=$BASELINE_BRANCH" >> $GITHUB_OUTPUT
+
+      - name: Update version files if custom versions provided
+        run: |
+          # Update games version if provided
+          if [[ -n "${{ inputs.games_version }}" ]]; then
+            echo "Updating games version to ${{ inputs.games_version }}"
+            # Update games submodule or version reference
+            if [[ -f "games_versions.gradle" ]]; then
+              sed -i "s/GAMES_VERSION = .*/GAMES_VERSION = '${{ inputs.games_version }}'/" games_versions.gradle
+            fi
+          fi
+
+          # Update AMS version if provided
+          if [[ -n "${{ inputs.ams_version }}" ]]; then
+            echo "Updating AMS version to ${{ inputs.ams_version }}"
+            sed -i "s/AMS_SDK_VERSION = .*/AMS_SDK_VERSION = '${{ inputs.ams_version }}'/" versions.gradle
+          fi
+
+          # Update Aura SDK version
+          echo "Updating Aura SDK version to ${{ inputs.sdk_version }}"
+          sed -i "s/SDK_VERSION = .*/SDK_VERSION = '${{ inputs.sdk_version }}'/" versions.gradle
+
+      - name: Build APK
+        run: |
+          FLAVOR_CAPITALIZED="$(echo '${{ inputs.flavor }}' | sed 's/^./\U&/')"
+          BUILD_TASK="assembleRelease"
+          echo "Building with task: $BUILD_TASK"
+
+          ./gradlew $BUILD_TASK --stacktrace
+
+          # Find the generated APK
+          APK_PATH=$(find app/build/outputs/apk -name "*.apk" -type f | head -1)
+          echo "APK_PATH=$APK_PATH" >> $GITHUB_ENV
+          echo "Found APK at: $APK_PATH"
+
+      - name: Extract APK information and version
+        id: apk_info
+        run: |
+          if [[ -z "$APK_PATH" ]]; then
+            echo "APK not found!"
+            exit 1
+          fi
+
+          # Extract target and min SDK versions using aapt
+          TARGET_SDK=$(aapt dump badging "$APK_PATH" | grep targetSdkVersion | sed "s/.*targetSdkVersion:'\([0-9]*\)'.*/\1/")
+          MIN_SDK=$(aapt dump badging "$APK_PATH" | grep sdkVersion | sed "s/.*sdkVersion:'\([0-9]*\)'.*/\1/")
+
+          # Extract version name and code from APK
+          VERSION_NAME=$(aapt dump badging "$APK_PATH" | grep versionName | sed "s/.*versionName='\([^']*\)'.*/\1/")
+          VERSION_CODE=$(aapt dump badging "$APK_PATH" | grep versionCode | sed "s/.*versionCode='\([0-9]*\)'.*/\1/")
+
+          echo "target_sdk=$TARGET_SDK" >> $GITHUB_OUTPUT
+          echo "min_sdk=$MIN_SDK" >> $GITHUB_OUTPUT
+          echo "version_name=$VERSION_NAME" >> $GITHUB_OUTPUT
+          echo "version_code=$VERSION_CODE" >> $GITHUB_OUTPUT
+          echo "brand=${{ inputs.flavor }}" >> $GITHUB_OUTPUT
+
+          echo "Target SDK: $TARGET_SDK"
+          echo "Min SDK: $MIN_SDK"
+          echo "Version Name: $VERSION_NAME"
+          echo "Version Code: $VERSION_CODE"
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          BASELINE_BRANCH="${{ steps.baseline.outputs.baseline_branch }}"
+          echo "Generating changelog from $BASELINE_BRANCH to ${{ env.WORKING_BRANCH }}"
+
+          # Fetch the baseline branch
+          git fetch origin $BASELINE_BRANCH:refs/remotes/origin/$BASELINE_BRANCH || {
+            echo "Warning: Could not fetch baseline branch $BASELINE_BRANCH, trying to continue..."
+          }
+
+          # Generate changelog using git log - get commit messages between baseline and current branch
+          CHANGELOG=$(git log --oneline --no-merges origin/$BASELINE_BRANCH..${{ env.WORKING_BRANCH }} --pretty=format:"%s" | head -50)
+
+          if [[ -z "$CHANGELOG" ]]; then
+            # Try alternative approach if branches are the same or no diff
+            RECENT_COMMITS=$(git log --oneline --no-merges -10 --pretty=format:"%s")
+            if [[ -z "$RECENT_COMMITS" ]]; then
+              CHANGELOG="No commits found between $BASELINE_BRANCH and ${{ env.WORKING_BRANCH }}"
+            else
+              CHANGELOG="Recent commits (baseline comparison failed):"$'\n'"$RECENT_COMMITS"
+            fi
+          fi
+
+          # Format changelog for GitHub release - each commit on a new line with bullet point
+          CHANGELOG_FORMATTED=""
+          while IFS= read -r line; do
+            if [[ -n "$line" ]]; then
+              CHANGELOG_FORMATTED+="- $line"$'\n'
+            fi
+          done <<< "$CHANGELOG"
+
+          # Remove trailing newline
+          CHANGELOG_FORMATTED=$(echo "$CHANGELOG_FORMATTED" | sed '$s/$//')
+
+          # Create multiline output for use in release body
+          {
+            echo "changelog_content<<EOF"
+            echo "$CHANGELOG_FORMATTED"
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: "v${{ steps.apk_info.outputs.version_name }}-${{ inputs.flavor }}-${{ github.run_number }}"
+          release_name: "OOBE ${{ steps.apk_info.outputs.version_name }} - ${{ steps.apk_info.outputs.brand }}"
+          body: |
+            ## Release Information
+
+            **Release Version:** ${{ steps.apk_info.outputs.version_name }}
+            **Version Code:** ${{ steps.apk_info.outputs.version_code }}
+            **Brand/Flavor:** ${{ steps.apk_info.outputs.brand }}
+            **Aura SDK Version:** ${{ inputs.aura_sdk_version }}
+            ${{ inputs.games_version && format('**Games Version:** {0}', inputs.games_version) || '' }}
+            ${{ inputs.ams_version && format('**AMS Version:** {0}', inputs.ams_version) || '' }}
+            **App Target SDK:** ${{ steps.apk_info.outputs.target_sdk }}
+            **App Min SDK:** ${{ steps.apk_info.outputs.min_sdk }}
+            **Base Branch:** ${{ steps.baseline.outputs.baseline_branch }}
+            **Built from Branch:** ${{ env.WORKING_BRANCH }}
+            **Build Number:** ${{ github.run_number }}
+
+            ## Changelog
+
+            Changes since ${{ steps.baseline.outputs.baseline_branch }}:
+
+            ${{ steps.changelog.outputs.changelog_content }}
+
+            ---
+
+            *This release was automatically generated from the on-demand release workflow.*
+            *APK was built locally and metadata extracted - no files uploaded to external storage.*
+          draft: false
+          prerelease: false
+
+      - name: Create release summary
+        run: |
+          cat << EOF >> $GITHUB_STEP_SUMMARY
+          # 🚀 Release Created Successfully
+
+          ## Release Details
+          - **Release Version:** ${{ steps.apk_info.outputs.version_name }}
+          - **Version Code:** ${{ steps.apk_info.outputs.version_code }}
+          - **Brand/Flavor:** ${{ steps.apk_info.outputs.brand }}
+          - **Release URL:** ${{ steps.create_release.outputs.html_url }}
+          - **Tag:** v${{ steps.apk_info.outputs.version_name }}-${{ inputs.flavor }}-${{ github.run_number }}
+
+          ## Build Configuration
+          - **Aura SDK Version:** ${{ inputs.sdk_version }}
+          ${{ inputs.games_version && format('- **Games Version:** {0}', inputs.games_version) || '' }}
+          ${{ inputs.ams_version && format('- **AMS Version:** {0}', inputs.ams_version) || '' }}
+          - **Target SDK:** ${{ steps.apk_info.outputs.target_sdk }}
+          - **Min SDK:** ${{ steps.apk_info.outputs.min_sdk }}
+
+          ## Source
+          - **Base Branch:** ${{ steps.baseline.outputs.baseline_branch }}
+          - **Built from:** ${{ env.WORKING_BRANCH }}
+
+          ## APK Information
+          - **APK Location:** Local build only (not uploaded)
+          - **Version extracted from APK:** ${{ steps.apk_info.outputs.version_name }}
+
+          The release has been created with all metadata extracted from the built APK.
+          EOF
